@@ -15,7 +15,7 @@ use Mekras\Obereg\Storage\Storage;
  * Outbound transfers queue.
  *
  * @api
- * @since x.x
+ * @since 1.0
  */
 class Queue
 {
@@ -52,7 +52,7 @@ class Queue
      *
      * @return void
      *
-     * @since x.x
+     * @since 1.0
      */
     public function enqueue($data)
     {
@@ -64,7 +64,7 @@ class Queue
      *
      * @return Item|null The data item or null if queue is empty.
      *
-     * @since x.x
+     * @since 1.0
      */
     public function dequeue()
     {

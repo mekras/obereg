@@ -11,7 +11,7 @@ namespace Mekras\Obereg\Storage;
  * Storage item.
  *
  * @api
- * @since x.x
+ * @since 1.0
  */
 final class Item
 {
@@ -27,7 +27,7 @@ final class Item
      *
      * @param mixed $data Data to be queued.
      *
-     * @since x.x
+     * @since 1.0
      */
     public function __construct($data)
     {
@@ -39,7 +39,7 @@ final class Item
      *
      * @return mixed
      *
-     * @since x.x
+     * @since 1.0
      */
     public function getData()
     {

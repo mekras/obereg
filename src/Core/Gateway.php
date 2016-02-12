@@ -259,9 +259,9 @@ abstract class Gateway
     {
         if ($this->getCache()) {
             $hash = $this->getDataHash($request);
-            $string = $this->getCache()->get($this->getId(), $hash);
-            if (null !== $string) {
-                return $this->getSerializer()->unserialize($string);
+            $item = $this->getCache()->get($this->getId(), $hash);
+            if (null !== $item) {
+                return $this->getSerializer()->unserialize($item->get());
             }
         }
         $data = $this->getInboundPolicy()->getDefault();

@@ -12,6 +12,7 @@ use Http\Client\HttpClient;
 use Http\Message\MessageFactory\GuzzleMessageFactory;
 use Http\Message\StreamFactory\GuzzleStreamFactory;
 use Mekras\Obereg\Core\Cache\Cache;
+use Mekras\Obereg\Core\Cache\SerializableCacheItem;
 use Mekras\Obereg\Core\Policy\Inbound\DefaultInboundPolicy;
 use Mekras\Obereg\Http\HttpGateway;
 use PHPUnit_Framework_TestCase as TestCase;
@@ -118,12 +119,15 @@ class HttpGatewayTest extends TestCase
         /** @var HttpClient $httpClient */
 
         $cache = $this->getMockForAbstractClass(Cache::class);
-        $cache->expects(static::once())->method('get')->with('foo')->willReturn(
-            "RESPONSE\r\n" .
-            "Content-type: application/json\r\n" .
-            "\r\n" .
-            'Foo'
-        );
+        $cache->expects(static::once())->method('get')->with('foo')
+            ->willReturn(
+                new SerializableCacheItem(
+                    "RESPONSE\r\n" .
+                    "Content-type: application/json\r\n" .
+                    "\r\n" .
+                    'Foo'
+                )
+            );
         /** @var Cache $cache */
 
         $gw = new HttpGateway(

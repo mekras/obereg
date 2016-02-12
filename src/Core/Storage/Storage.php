@@ -11,7 +11,7 @@ namespace Mekras\Obereg\Storage;
  * Storage interface.
  *
  * @api
- * @since x.x
+ * @since 1.0
  */
 interface Storage
 {
@@ -23,7 +23,7 @@ interface Storage
      *
      * @return void
      *
-     * @since x.x
+     * @since 1.0
      */
     public function store($groupId, $data);
 
@@ -34,7 +34,7 @@ interface Storage
      *
      * @return Item[] The items of a specified group.
      *
-     * @since x.x
+     * @since 1.0
      */
     public function fetch($groupId);
 }

@@ -37,7 +37,7 @@ class NullCache implements Cache
      * @param string $gatewayId The gateway ID.
      * @param string $hash      The data hash.
      *
-     * @return Container|null The data container or null if no data available
+     * @return CacheItem|null The data container or null if no data available
      *
      * @since 1.0
      */
