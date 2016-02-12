@@ -18,9 +18,13 @@
         "php-http/message": "^1.0",
         "php-http/message-factory": "^1.0"
     },
+    "suggest": {
+        "doctrine/cache": "Use Doctrine Cache as a caching backend"
+    },
     "require-dev": {
-        "phpunit/phpunit": "^4.8",
-        "guzzlehttp/psr7": "^1.2"
+        "doctrine/cache": "^1.6",
+        "guzzlehttp/psr7": "^1.2",
+        "phpunit/phpunit": "^4.8"
     },
     "autoload": {
         "psr-4": {

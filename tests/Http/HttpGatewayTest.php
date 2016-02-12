@@ -7,13 +7,14 @@
  */
 namespace Mekras\Obereg\Tests\Http;
 
+use Doctrine\Common\Cache\ArrayCache;
 use Http\Client\Exception\TransferException;
 use Http\Client\HttpClient;
 use Http\Message\MessageFactory\GuzzleMessageFactory;
 use Http\Message\StreamFactory\GuzzleStreamFactory;
 use Mekras\Obereg\Core\Cache\Cache;
-use Mekras\Obereg\Core\Cache\SerializableCacheItem;
 use Mekras\Obereg\Core\Policy\Inbound\DefaultInboundPolicy;
+use Mekras\Obereg\Doctrine\Cache\DoctrineCacheAdapter;
 use Mekras\Obereg\Http\HttpGateway;
 use PHPUnit_Framework_TestCase as TestCase;
 use Psr\Http\Message\RequestInterface;
@@ -73,6 +74,7 @@ class HttpGatewayTest extends TestCase
             new GuzzleMessageFactory(),
             new GuzzleStreamFactory()
         );
+        $gw->setCache(new DoctrineCacheAdapter(new ArrayCache()));
         $gw->sendRequest($request);
     }
 
@@ -98,6 +100,7 @@ class HttpGatewayTest extends TestCase
             new GuzzleMessageFactory(),
             new GuzzleStreamFactory()
         );
+        $gw->setCache(new DoctrineCacheAdapter(new ArrayCache()));
         $gw->setInboundPolicy(new DefaultInboundPolicy($expectedResponse));
 
         $actualResponse = $gw->sendRequest($request);
@@ -118,16 +121,15 @@ class HttpGatewayTest extends TestCase
             ->willThrowException(new TransferException());
         /** @var HttpClient $httpClient */
 
-        $cache = $this->getMockForAbstractClass(Cache::class);
-        $cache->expects(static::once())->method('get')->with('foo')
-            ->willReturn(
-                new SerializableCacheItem(
-                    "RESPONSE\r\n" .
-                    "Content-type: application/json\r\n" .
-                    "\r\n" .
-                    'Foo'
-                )
-            );
+        $cache = new DoctrineCacheAdapter(new ArrayCache());
+        $cache->put(
+            'foo',
+            sha1((string) $request->getUri()),
+            "RESPONSE\r\n" .
+            "Content-type: application/json\r\n" .
+            "\r\n" .
+            'Foo'
+        );
         /** @var Cache $cache */
 
         $gw = new HttpGateway(
