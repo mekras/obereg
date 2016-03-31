@@ -27,7 +27,7 @@ class DefaultOutboundPolicy implements OutboundPolicy
     /**
      * Policy constructor.
      *
-     * @param int $delay Delay between resend trials in seconds.
+     * @param int $delay Delay between resend trials in seconds. 0 — now delay, -1 — never resend.
      *
      * @throws \InvalidArgumentException
      *
@@ -36,19 +36,29 @@ class DefaultOutboundPolicy implements OutboundPolicy
     public function __construct($delay = 0)
     {
         $this->delay = (int) $delay;
-        if ($this->delay < 0) {
-            throw new \InvalidArgumentException('Delay can not be negative');
+        if ($this->delay < -1) {
+            throw new \InvalidArgumentException('Delay can not be less than -1');
         }
     }
 
     /**
-     * Return true if the given data can be resented now.
+     * Return true if data can be resent later.
+     *
+     * @return bool
+     */
+    public function isResendAllowed()
+    {
+        return -1 !== $this->delay;
+    }
+
+    /**
+     * Return true if data can be resent now.
      *
      * @param DataContainer $dataContainer
      *
      * @return bool
      */
-    public function isResendAllowed(DataContainer $dataContainer)
+    public function isReadyToResend(DataContainer $dataContainer)
     {
         if (0 === $this->delay) {
             return true;

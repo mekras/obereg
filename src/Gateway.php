@@ -112,7 +112,7 @@ abstract class Gateway
                 break;
             }
 
-            if ($this->getOutboundPolicy()->isResendAllowed($container)) {
+            if ($this->getOutboundPolicy()->isReadyToResend($container)) {
                 $raw = $container->getData();
                 $data = $this->getSerializer()->unserialize($raw);
                 $this->transfer($data);
@@ -232,8 +232,10 @@ abstract class Gateway
      */
     protected function sendLater($request)
     {
-        $raw = $this->getSerializer()->serialize($request);
-        $this->getStorage()->enqueue($this->getId(), $raw);
+        if ($this->getOutboundPolicy()->isResendAllowed()) {
+            $raw = $this->getSerializer()->serialize($request);
+            $this->getStorage()->enqueue($this->getId(), $raw);
+        }
     }
 
     /**

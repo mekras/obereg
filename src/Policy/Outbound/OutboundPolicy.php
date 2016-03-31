@@ -18,11 +18,18 @@ use Mekras\Obereg\Storage\DataContainer;
 interface OutboundPolicy
 {
     /**
-     * Return true if the given data can be resented now.
+     * Return true if data can be resent later.
+     *
+     * @return bool
+     */
+    public function isResendAllowed();
+
+    /**
+     * Return true if data can be resent now.
      *
      * @param DataContainer $dataContainer
      *
      * @return bool
      */
-    public function isResendAllowed(DataContainer $dataContainer);
+    public function isReadyToResend(DataContainer $dataContainer);
 }
