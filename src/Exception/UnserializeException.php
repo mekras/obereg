@@ -5,14 +5,14 @@
  * @author    Михаил Красильников <m.krasilnikov@yandex.ru>
  * @license   http://opensource.org/licenses/MIT MIT
  */
-namespace Mekras\Obereg\Core\Exception;
+namespace Mekras\Obereg\Exception;
 
 /**
- * Inbound transfer exception.
+ * Failed to unserialize.
  *
  * @api
  * @since 1.0
  */
-class InboundTransferException extends RuntimeException
+class UnserializeException extends RuntimeException
 {
 }

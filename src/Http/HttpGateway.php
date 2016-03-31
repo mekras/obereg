@@ -11,8 +11,11 @@ use Http\Client\Exception\TransferException;
 use Http\Client\HttpClient;
 use Http\Message\MessageFactory;
 use Http\Message\StreamFactory;
-use Mekras\Obereg\Core\Exception\InboundTransferException;
-use Mekras\Obereg\Core\Gateway;
+use Mekras\Obereg\Exception\InboundTransferException;
+use Mekras\Obereg\Exception\SerializeException;
+use Mekras\Obereg\Exception\UnserializeException;
+use Mekras\Obereg\Gateway;
+use Mekras\Obereg\Storage\Storage;
 use Mekras\Types\Exception\InvalidArgumentTypeException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -36,6 +39,7 @@ class HttpGateway extends Gateway implements HttpClient
      * HttpGateway constructor.
      *
      * @param string         $id         Permanent unique gateway ID.
+     * @param Storage        $storage    Data storage.
      * @param HttpClient     $httpClient HTTP client.
      * @param MessageFactory $messageFactory
      * @param StreamFactory  $streamFactory
@@ -46,12 +50,12 @@ class HttpGateway extends Gateway implements HttpClient
      */
     public function __construct(
         $id,
+        Storage $storage,
         HttpClient $httpClient,
         MessageFactory $messageFactory,
         StreamFactory $streamFactory
     ) {
-        parent::__construct($id);
-        $this->setSerializer(new HttpDataSerializer($messageFactory, $streamFactory));
+        parent::__construct($id, $storage, new HttpDataSerializer($messageFactory, $streamFactory));
         $this->httpClient = $httpClient;
     }
 
@@ -62,11 +66,18 @@ class HttpGateway extends Gateway implements HttpClient
      *
      * @return ResponseInterface
      *
+     * @throws \Exception
+     * @throws \Http\Client\Exception
+     * @throws \InvalidArgumentException
+     * @throws InboundTransferException
+     * @throws InvalidArgumentTypeException
+     * @throws SerializeException
+     * @throws UnserializeException
+     *
      * @since 1.0
      */
     public function sendRequest(RequestInterface $request)
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return $this->transfer($request);
     }
 
@@ -77,10 +88,13 @@ class HttpGateway extends Gateway implements HttpClient
      *
      * @return ResponseInterface
      *
-     * @throws InboundTransferException
-     * @throws InvalidArgumentTypeException
+     * @throws \Exception
      * @throws \Http\Client\Exception
      * @throws \InvalidArgumentException
+     * @throws InboundTransferException
+     * @throws InvalidArgumentTypeException
+     * @throws SerializeException
+     * @throws UnserializeException
      *
      * @since 1.0
      */
@@ -92,9 +106,10 @@ class HttpGateway extends Gateway implements HttpClient
             $response = $this->httpClient->sendRequest($request);
         } catch (TransferException $e) {
             /* In case of failure pushing request to outbound channel */
-            //$this->getQueue()->enqueue($request);
+            $this->sendLater($request);
             $response = $this->getCachedData($request);
         }
+
         return $response;
     }
 
@@ -112,6 +127,7 @@ class HttpGateway extends Gateway implements HttpClient
     protected function getDataHash($data)
     {
         $this->checkArgumentType(__METHOD__, 1, RequestInterface::class, $data);
+
         return sha1((string) $data->getUri());
     }
 

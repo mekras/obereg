@@ -5,14 +5,14 @@
  * @author    Михаил Красильников <m.krasilnikov@yandex.ru>
  * @license   http://opensource.org/licenses/MIT MIT
  */
-namespace Mekras\Obereg\Core\Exception;
+namespace Mekras\Obereg\Exception;
 
 /**
- * Transfer exception.
+ * Failed to serialize.
  *
  * @api
  * @since 1.0
  */
-class TransferException extends RuntimeException
+class SerializeException extends RuntimeException
 {
 }

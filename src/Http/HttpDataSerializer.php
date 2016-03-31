@@ -9,8 +9,8 @@ namespace Mekras\Obereg\Http;
 
 use Http\Message\MessageFactory;
 use Http\Message\StreamFactory;
-use Mekras\Obereg\Core\DataSerializer;
-use Mekras\Obereg\Core\Exception\UnserializeException;
+use Mekras\Obereg\DataSerializer;
+use Mekras\Obereg\Exception\UnserializeException;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestInterface;
 

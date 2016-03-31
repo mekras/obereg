@@ -5,9 +5,10 @@
  * @author    Михаил Красильников <m.krasilnikov@yandex.ru>
  * @license   http://opensource.org/licenses/MIT MIT
  */
-namespace Mekras\Obereg\Core;
+namespace Mekras\Obereg;
 
-use Mekras\Obereg\Core\Exception\UnserializeException;
+use Mekras\Obereg\Exception\SerializeException;
+use Mekras\Obereg\Exception\UnserializeException;
 
 /**
  * Generic data serializer.
@@ -26,6 +27,8 @@ class DataSerializer
      * @param mixed $data
      *
      * @return string
+     *
+     * @throws SerializeException If $data can not be serialized.
      *
      * @since 1.0
      */

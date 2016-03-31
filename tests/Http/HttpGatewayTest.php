@@ -12,10 +12,9 @@ use Http\Client\Exception\TransferException;
 use Http\Client\HttpClient;
 use Http\Message\MessageFactory\GuzzleMessageFactory;
 use Http\Message\StreamFactory\GuzzleStreamFactory;
-use Mekras\Obereg\Core\Cache\Cache;
-use Mekras\Obereg\Core\Policy\Inbound\DefaultInboundPolicy;
-use Mekras\Obereg\Doctrine\Cache\DoctrineCacheAdapter;
+use Mekras\Obereg\Doctrine\Storage\DoctrineCacheStorage;
 use Mekras\Obereg\Http\HttpGateway;
+use Mekras\Obereg\Policy\Inbound\DefaultInboundPolicy;
 use PHPUnit_Framework_TestCase as TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -28,12 +27,13 @@ use Psr\Http\Message\ResponseInterface;
 class HttpGatewayTest extends TestCase
 {
     /**
-     *
+     * @throws \Exception
      */
     public function testUnsafeTransfer()
     {
-        $request = $this->getMockForAbstractClass(RequestInterface::class);
-        /** @var RequestInterface $request */
+        $messageFactory = new GuzzleMessageFactory();
+
+        $request = $messageFactory->createRequest('GET', 'http://example.com');
 
         $expectedResponse = $this->getMockForAbstractClass(ResponseInterface::class);
         /** @var ResponseInterface $expectedResponse */
@@ -43,10 +43,13 @@ class HttpGatewayTest extends TestCase
             ->willReturn($expectedResponse);
         /** @var HttpClient $httpClient */
 
+        $storage = new DoctrineCacheStorage(new ArrayCache());
+
         $gw = new HttpGateway(
             'foo',
+            $storage,
             $httpClient,
-            new GuzzleMessageFactory(),
+            $messageFactory,
             new GuzzleStreamFactory()
         );
 
@@ -56,35 +59,41 @@ class HttpGatewayTest extends TestCase
     }
 
     /**
-     * @expectedException \Mekras\Obereg\Core\Exception\InboundTransferException
+     * @expectedException \Mekras\Obereg\Exception\InboundTransferException
+     *
+     * @throws \Exception
      */
     public function testInboundCacheEmptyNoDefault()
     {
-        $request = $this->getMockForAbstractClass(RequestInterface::class);
-        /** @var RequestInterface $request */
+        $messageFactory = new GuzzleMessageFactory();
+
+        $request = $messageFactory->createRequest('GET', 'http://example.com');
 
         $httpClient = $this->getMockForAbstractClass(HttpClient::class);
         $httpClient->expects(static::once())->method('sendRequest')->with($request)
             ->willThrowException(new TransferException());
         /** @var HttpClient $httpClient */
 
+        $storage = new DoctrineCacheStorage(new ArrayCache());
+
         $gw = new HttpGateway(
             'foo',
+            $storage,
             $httpClient,
-            new GuzzleMessageFactory(),
+            $messageFactory,
             new GuzzleStreamFactory()
         );
-        $gw->setCache(new DoctrineCacheAdapter(new ArrayCache()));
         $gw->sendRequest($request);
     }
 
     /**
-     *
+     * @throws \Exception
      */
     public function testInboundCacheEmptyDefault()
     {
-        $request = $this->getMockForAbstractClass(RequestInterface::class);
-        /** @var RequestInterface $request */
+        $messageFactory = new GuzzleMessageFactory();
+
+        $request = $messageFactory->createRequest('GET', 'http://example.com');
 
         $httpClient = $this->getMockForAbstractClass(HttpClient::class);
         $httpClient->expects(static::once())->method('sendRequest')->with($request)
@@ -94,35 +103,38 @@ class HttpGatewayTest extends TestCase
         $expectedResponse = $this->getMockForAbstractClass(ResponseInterface::class);
         /** @var ResponseInterface $expectedResponse */
 
+        $storage = new DoctrineCacheStorage(new ArrayCache());
+
         $gw = new HttpGateway(
             'foo',
+            $storage,
             $httpClient,
-            new GuzzleMessageFactory(),
+            $messageFactory,
             new GuzzleStreamFactory()
         );
-        $gw->setCache(new DoctrineCacheAdapter(new ArrayCache()));
         $gw->setInboundPolicy(new DefaultInboundPolicy($expectedResponse));
 
         $actualResponse = $gw->sendRequest($request);
 
-        static::assertSame($actualResponse, $expectedResponse);
+        static::assertSame($expectedResponse, $actualResponse);
     }
 
     /**
-     *
+     * @throws \Exception
      */
     public function testInboundCached()
     {
-        $request = $this->getMockForAbstractClass(RequestInterface::class);
-        /** @var RequestInterface $request */
+        $messageFactory = new GuzzleMessageFactory();
+
+        $request = $messageFactory->createRequest('GET', 'http://example.com');
 
         $httpClient = $this->getMockForAbstractClass(HttpClient::class);
         $httpClient->expects(static::once())->method('sendRequest')->with($request)
             ->willThrowException(new TransferException());
         /** @var HttpClient $httpClient */
 
-        $cache = new DoctrineCacheAdapter(new ArrayCache());
-        $cache->put(
+        $storage = new DoctrineCacheStorage(new ArrayCache());
+        $storage->put(
             'foo',
             sha1((string) $request->getUri()),
             "RESPONSE\r\n" .
@@ -130,15 +142,14 @@ class HttpGatewayTest extends TestCase
             "\r\n" .
             'Foo'
         );
-        /** @var Cache $cache */
 
         $gw = new HttpGateway(
             'foo',
+            $storage,
             $httpClient,
-            new GuzzleMessageFactory(),
+            $messageFactory,
             new GuzzleStreamFactory()
         );
-        $gw->setCache($cache);
 
         $response = $gw->sendRequest($request);
 
@@ -147,23 +158,48 @@ class HttpGatewayTest extends TestCase
     }
 
     /**
-     *
-     * /
-     * public function testOutboundEnqueue()
-     * {
-     * $request = $this->getMockForAbstractClass(RequestInterface::class);
-     * /** @var RequestInterface $request * /
-     *
-     * $httpClient = $this->getMockForAbstractClass(HttpClient::class);
-     * $httpClient->expects(static::once())->method('sendRequest')->with($request)
-     * ->willThrowException(new TransferException());
-     * /** @var HttpClient $httpClient * /
-     *
-     * $gw = new HttpGateway('foo', $httpClient);
-     * $gw->setOutboundPolicy();
-     *
-     * $gw->sendRequest($request);
-     *
-     * static::assertSame($actualResponse, $expectedResponse);
-     * }*/
+     * @throws \Exception
+     */
+    public function testOutboundEnqueue()
+    {
+        $messageFactory = new GuzzleMessageFactory();
+
+        $request = $messageFactory->createRequest('GET', 'http://example.com');
+
+        $httpClient = $this->getMockForAbstractClass(HttpClient::class);
+        $httpClient->expects(static::exactly(2))->method('sendRequest')->willReturnCallback(
+            function (RequestInterface $req) use ($request) {
+                static $it = 0;
+                $it++;
+                switch ($it) {
+                    case 1:
+                        throw new TransferException();
+
+                    case 2:
+                        \PHPUnit_Framework_Assert::assertEquals($request->getUri(), $req->getUri());
+                        return $this->getMockForAbstractClass(ResponseInterface::class);
+                }
+            }
+        );
+        /** @var HttpClient $httpClient */
+
+        $storage = new DoctrineCacheStorage(new ArrayCache());
+
+        $gw = new HttpGateway(
+            'foo',
+            $storage,
+            $httpClient,
+            $messageFactory,
+            new GuzzleStreamFactory()
+        );
+
+        $defaultResponse = $this->getMockForAbstractClass(ResponseInterface::class);
+        /** @var ResponseInterface $defaultResponse */
+        $gw->setInboundPolicy(new DefaultInboundPolicy($defaultResponse));
+
+        $response = $gw->sendRequest($request);
+        static::assertSame($defaultResponse, $response);
+
+        $gw->runQueue();
+    }
 }
