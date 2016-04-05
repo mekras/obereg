@@ -32,13 +32,4 @@ interface DataContainer
      * @since 1.0
      */
     public function getCreated();
-
-    /**
-     * Return timestamp when this container was last accessed.
-     *
-     * @return int
-     *
-     * @since 1.0
-     */
-    public function getLastAccessed();
 }

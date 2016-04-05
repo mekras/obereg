@@ -30,13 +30,6 @@ class GenericDataContainer implements DataContainer
     private $created;
 
     /**
-     * When was container accessed.
-     *
-     * @var int
-     */
-    private $accessed;
-
-    /**
      * Create container for a given data.
      *
      * @param string $data
@@ -45,7 +38,6 @@ class GenericDataContainer implements DataContainer
     {
         $this->data = (string) $data;
         $this->created = time();
-        $this->accessed = $this->created;
     }
 
     /**
@@ -70,17 +62,5 @@ class GenericDataContainer implements DataContainer
     public function getCreated()
     {
         return $this->created;
-    }
-
-    /**
-     * Return timestamp when this container was last accessed.
-     *
-     * @return int
-     *
-     * @since 1.0
-     */
-    public function getLastAccessed()
-    {
-        return $this->accessed;
     }
 }

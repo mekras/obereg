@@ -64,6 +64,6 @@ class DefaultOutboundPolicy implements OutboundPolicy
      */
     public function isReadyToResend(DataContainer $dataContainer)
     {
-        return time() - $dataContainer->getLastAccessed() > $this->delay;
+        return time() - $dataContainer->getCreated() > $this->delay;
     }
 }
