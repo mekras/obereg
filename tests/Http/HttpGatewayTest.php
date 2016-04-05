@@ -15,6 +15,7 @@ use Http\Message\StreamFactory\GuzzleStreamFactory;
 use Mekras\Obereg\Doctrine\Storage\DoctrineCacheStorage;
 use Mekras\Obereg\Http\HttpGateway;
 use Mekras\Obereg\Policy\Inbound\DefaultInboundPolicy;
+use Mekras\Obereg\Policy\Outbound\DefaultOutboundPolicy;
 use PHPUnit_Framework_TestCase as TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -196,10 +197,12 @@ class HttpGatewayTest extends TestCase
         $defaultResponse = $this->getMockForAbstractClass(ResponseInterface::class);
         /** @var ResponseInterface $defaultResponse */
         $gw->setInboundPolicy(new DefaultInboundPolicy($defaultResponse));
+        $gw->setOutboundPolicy(new DefaultOutboundPolicy(1));
 
         $response = $gw->sendRequest($request);
         static::assertSame($defaultResponse, $response);
 
+        sleep(2);
         $gw->runQueue();
     }
 }

@@ -20,24 +20,28 @@ class DefaultOutboundPolicy implements OutboundPolicy
     /**
      * Delay between resend trials in seconds.
      *
-     * @var int
+     * @var int|null
      */
     private $delay;
 
     /**
      * Policy constructor.
      *
-     * @param int $delay Delay between resend trials in seconds. 0 — now delay, -1 — never resend.
+     * @param int|null $delay Delay between resend trials in seconds. null — never resend.
      *
      * @throws \InvalidArgumentException
      *
      * @since 1.0
      */
-    public function __construct($delay = 0)
+    public function __construct($delay = null)
     {
-        $this->delay = (int) $delay;
-        if ($this->delay < -1) {
-            throw new \InvalidArgumentException('Delay can not be less than -1');
+        if (null === $delay) {
+            $this->delay = null;
+        } else {
+            $this->delay = (int) $delay;
+            if ($this->delay < 1) {
+                throw new \InvalidArgumentException('Delay can not be less than 1 second');
+            }
         }
     }
 
@@ -48,7 +52,7 @@ class DefaultOutboundPolicy implements OutboundPolicy
      */
     public function isResendAllowed()
     {
-        return -1 !== $this->delay;
+        return null !== $this->delay;
     }
 
     /**
@@ -60,9 +64,6 @@ class DefaultOutboundPolicy implements OutboundPolicy
      */
     public function isReadyToResend(DataContainer $dataContainer)
     {
-        if (0 === $this->delay) {
-            return true;
-        }
         return time() - $dataContainer->getLastAccessed() > $this->delay;
     }
 }
