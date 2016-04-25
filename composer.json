@@ -12,7 +12,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": "^5.5",
+        "php": ">=5.5",
         "mekras/types": "^1.5",
         "php-http/httplug": "^1.0",
         "php-http/message": "^1.0",
