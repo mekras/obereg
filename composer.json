@@ -16,12 +16,11 @@
         "mekras/types": "^1.5",
         "php-http/httplug": "^1.0",
         "php-http/message": "^1.0",
-        "php-http/message-factory": "^1.0"
-    },
-    "suggest": {
-        "doctrine/cache": "Use Doctrine Cache as a caching backend"
+        "php-http/message-factory": "^1.0",
+        "psr/cache": "^1.0.1"
     },
     "require-dev": {
+        "cache/array-adapter": "^0.4",
         "doctrine/cache": "^1.6",
         "guzzlehttp/psr7": "^1.2",
         "phpunit/phpunit": "^4.8"
