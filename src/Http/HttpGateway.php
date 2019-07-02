@@ -16,7 +16,6 @@ use Mekras\Obereg\Exception\SerializeException;
 use Mekras\Obereg\Exception\UnserializeException;
 use Mekras\Obereg\Gateway;
 use Mekras\Obereg\Storage\Storage;
-use Mekras\Types\Exception\InvalidArgumentTypeException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -70,7 +69,7 @@ class HttpGateway extends Gateway implements HttpClient
      * @throws \Http\Client\Exception
      * @throws \InvalidArgumentException
      * @throws InboundTransferException
-     * @throws InvalidArgumentTypeException
+     * @throws \InvalidArgumentException
      * @throws SerializeException
      * @throws UnserializeException
      *
@@ -92,7 +91,7 @@ class HttpGateway extends Gateway implements HttpClient
      * @throws \Http\Client\Exception
      * @throws \InvalidArgumentException
      * @throws InboundTransferException
-     * @throws InvalidArgumentTypeException
+     * @throws \InvalidArgumentException
      * @throws SerializeException
      * @throws UnserializeException
      *
@@ -141,14 +140,14 @@ class HttpGateway extends Gateway implements HttpClient
      *
      * @return void
      *
-     * @throws InvalidArgumentTypeException
+     * @throws \InvalidArgumentException
      *
      * @since 1.0
      */
     protected function checkArgumentType($method, $argNum, $expected, $actual)
     {
         if ($expected !== gettype($actual) && !is_a($actual, $expected)) {
-            throw new InvalidArgumentTypeException($method, $argNum, $expected, $actual);
+            throw new \InvalidArgumentException($method, $argNum, $expected, $actual);
         }
     }
 }
